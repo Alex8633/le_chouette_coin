@@ -1,51 +1,31 @@
 <?php
+
 $title = 'Identification - le Chouette Coin';
 require 'includes/header.php';
-require 'includes/config.php';
 
-var_dump($_POST);
 if (!empty($_POST['email_signup']) && !empty($_POST['password1_signup']) && !empty($_POST['username_signup']) && isset($_POST['submit_signup'])) {
     $email = $_POST['email_signup'];
-    $password1 = $_POST['password1_signup'];
-    $password2 = $_POST['password2_signup'];
-    $username = $_POST['username_signup'];
-    echo 'je suis la';
-    try {
-        $sql1 = "SELECT * FROM users WHERE email = '{$email}'";
-        $sql2 = "SELECT * FROM users WHERE username = '{$username}'";
-        $res1 = $conn->query($sql1);
-        $count_email = $res1->fetchColumn();
-        var_dump($count_email);
-        if (!$count_email) {
-            $res2 = $conn->query($sql2);
-            $count_user = $res2->fetchColumn();
-            if (!$count_user) {
-                if ($password1 === $password2) {
-                    $password1 = password_hash($password1, PASSWORD_DEFAULT);
-                    $sth = $conn->prepare("INSERT INTO users (email, username, password) VALUES (:email, :username, :password)");
-                    $sth->bindValue(':email', $email);
-                    $sth->bindValue(':username', $username);
-                    $sth->bindValue(':password', $password1);
-                    echo 'utilisateur a bien été enregisté';
-                } else {
-                    echo 'les mots de passe ne concorde pas';
-                }
-            } else {
-                echo "Ce non d'utilisateur est déja pris !";
-            }
-        } elseif (!$count_email > 0) {
-            echo 'Cette adresse mail existe déja !';
-        }
-    } catch (PDOException $e) {
-        echo 'Error: ' . $e->getMessage();
+    $password1 = htmlspecialchars($_POST['password1_signup']);
+    $password2 = htmlspecialchars($_POST['password2_signup']);
+    $username = htmlspecialchars($_POST['username_signup']);
+    inscription($email, $username, $password1, $password2);
+} elseif (!empty($_POST['email_login']) && !empty($_POST['password_login']) && isset($_POST['submit_login'])) {
+    $email = strip_tags($_POST['email_login']);
+    $password = strip_tags($_POST['password_login']);
+
+    connexion($email, $password);
+
+
+} else {
+    if (isset($_POST)) {
+        unset($_POST);
     }
 }
-
 
 ?>
 <div class="row">
     <div class="col-6">
-
+        <h3>S'inscrire</h3>
         <form method="post" action="<?php $_SERVER['REQUEST_URI'] ?>">
             <div class="form-group">
                 <label for="exampleInputEmail1">Adresse mail</label>
@@ -78,19 +58,23 @@ if (!empty($_POST['email_signup']) && !empty($_POST['password1_signup']) && !emp
     </div>
 
     <div class="col-6">
+        <h3>Se connecter</h3>
         <form method="post" action="<?php $_SERVER['REQUEST_URI'] ?>">
             <div class="form-group">
-                <label for="exampleInputEmail1">Email address</label>
+                <label for="exampleInputEmail1">Adresse mail</label>
                 <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
-                       name="email_signup">
+                       name="email_login">
                 <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone
                     else.</small>
             </div>
             <div class="form-group">
-                <label for="InputPassword1">Choisissez un mot de passe</label>
-                <input type="password" class="form-control" id="InputPassword1">
+                <label for="InputPassword2">Choisissez un mot de passe</label>
+                <input type="password" class="form-control" id="InputPassword1" name="password_login">
             </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="submit" class="btn btn-success" name="submit_login" value="connexion">Se connecter</button>
         </form>
     </div>
 </div>
+<?php
+require 'includes/footer.php';
+?>

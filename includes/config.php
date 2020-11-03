@@ -9,11 +9,11 @@ try {
     //On définit le mode d'erreur de PDO sur Exception
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     session_start();
-    echo 'Connexion réussie';
 } catch (PDOException $e) {
     echo "Erreur : " . $e->getMessage();
 }
 
 if(isset($_GET['logout'])) {
     session_destroy();
+    header('location: index.php');
 }
