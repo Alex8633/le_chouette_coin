@@ -15,20 +15,5 @@ require 'includes/header.php';
         </div>
     </div>
 
-    <table class="table table-dark">
-        <thead>
-        <tr>
-            <th scope="col">id</th>
-            <th scope="col">email</th>
-            <th scope="col">username</th>
-            <th scope="col">hashed password</th>
-        </tr>
-        </thead>
-        <tbody>
-        <?php
-        affichage();
-        ?>
-        </tbody>
-    </table>
 <?php
 require 'includes/footer.php';

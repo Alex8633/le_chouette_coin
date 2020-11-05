@@ -9,13 +9,12 @@ if (!empty($_POST['email_signup']) && !empty($_POST['password1_signup']) && !emp
     $password2 = htmlspecialchars($_POST['password2_signup']);
     $username = htmlspecialchars($_POST['username_signup']);
     inscription($email, $username, $password1, $password2);
+
 } elseif (!empty($_POST['email_login']) && !empty($_POST['password_login']) && isset($_POST['submit_login'])) {
     $email = strip_tags($_POST['email_login']);
     $password = strip_tags($_POST['password_login']);
-
     connexion($email, $password);
-
-
+    
 } else {
     if (isset($_POST)) {
         unset($_POST);

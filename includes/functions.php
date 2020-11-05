@@ -1,5 +1,4 @@
 <?php
-
 require 'includes/config.php';
 
 function inscription($email, $username, $password1, $password2)
@@ -50,7 +49,7 @@ function connexion($email, $password)
                 $_SESSION['email'] = $user['email'];
                 $_SESSION['username'] = $user['username'];
                 echo 'Vous êtes connectés !';
-                var_dump($_SESSION);
+                header('location: index.php');
             } else {
                 echo '<div class="alert alert-danger" role="alert">Le mot de passe est éronné !</div>';
                 unset($_POST);
@@ -64,24 +63,93 @@ function connexion($email, $password)
     }
 }
 
-function affichage()
+function affichageProduits()
 {
     global $conn;
-    $sth = $conn->prepare('SELECT * FROM users');
+    $sth = $conn->prepare('SELECT p.*, c.categories_name, u.username 
+                                    FROM products AS p 
+                                    LEFT JOIN categories AS c 
+                                    ON p.category_id = c.categories_id   
+                                    LEFT JOIN users AS u 
+                                    ON p.user_id = u.id');
     $sth->execute();
-    $users = $sth->fetchAll(PDO::FETCH_ASSOC);
-    foreach ($users as $user) {
+    $products = $sth->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($products as $product) {
         ?>
         <tr>
-            <th scope="row"><?php echo $user['id']; ?>
+            <th scope="row"><?php echo $product['products_id']; ?>
             </th>
-            <td><?php echo $user['email']; ?>
+            <td><?php echo $product['name']; ?>
             </td>
-            <td><?php echo $user['username']; ?>
+            <td><?php echo $product['description']; ?>
             </td>
-            <td><?php echo $user['password']; ?>
+            <td><?php echo $product['ville']; ?>
+            </td>
+            <td><?php echo $product['price']; ?>
+            </td>
+            <td><?php echo $product['categories_name']; ?>
+            </td>
+            <td><?php echo $product['username']; ?>
+            </td>
+            <td>
+                <a
+                        href="product.php/?id=<?php echo $product['products_id']; ?>">Afficher
+                    article</a>
             </td>
         </tr>
         <?php
     }
+}
+
+function ajoutProduits($name, $description, $price, $city, $category, $user_id)
+{
+    global $conn;
+    if (is_float($price) && $price > 0 && $price < 1000000) {
+        try {
+            $sth = $conn->prepare('INSERT INTO products (name, description, price, ville, category_id, user_id) 
+                            VALUES (:product_name, :description, :price, :ville, :category_id, :user_id)');
+            $sth->bindValue(':product_name', $name, PDO::PARAM_STR);
+            $sth->bindValue(':description', $description, PDO::PARAM_STR);
+            $sth->bindValue(':price', $price);
+            $sth->bindValue(':ville', $city, PDO::PARAM_STR);
+            $sth->bindValue(':category_id', $category, PDO::PARAM_INT);
+            $sth->bindValue(':user_id', $user_id, PDO::PARAM_INT);
+
+            if ($sth->execute()) {
+                echo "<div class='alert alert-succes'>Votre article a bien été ajouter</div>";
+                header('location: products.php');
+            }
+        } catch (PDOException $e) {
+            echo 'Error: ' . $e->getMessage();
+        }
+    }
+}
+
+function affichageProduit($id)
+{
+    global $conn;
+    $sth = $conn->prepare("SELECT p.*, c.categories_name, u.username 
+                                    FROM products AS p 
+                                    LEFT JOIN categories AS c 
+                                    ON p.category_id = c.categories_id 
+                                    LEFT JOIN users AS u 
+                                    ON p.user_id = u.id 
+                                    WHERE p.products_id = {$id}");
+    if ($sth->execute()) {
+        
+    };
+
+    $product = $sth->fetch(PDO::FETCH_ASSOC); ?>
+    <div class="row">
+        <div class="col-12">
+            <h1><?php echo $product['name']; ?>
+            </h1>
+            <p><?php echo $product['description']; ?>
+            </p>
+            <p><?php echo $product['ville']; ?>
+            </p>
+            <button class="btn btn-danger"><?php echo $product['price']; ?> </button>
+        </div>
+    </div>
+    <?php
 }
